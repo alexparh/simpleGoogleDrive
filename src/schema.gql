@@ -1,0 +1,48 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Mutation {
+  google(
+    """Auth user flag"""
+    authuser: String!
+
+    """Code"""
+    code: String!
+
+    """Domain"""
+    hd: String!
+
+    """Prompt (none by default)"""
+    prompt: String!
+
+    """Google scope"""
+    scope: String!
+  ): UserWithToken
+  refresh(
+    """Refresh token"""
+    refreshToken: String!
+  ): UserWithToken
+}
+
+type Query {
+  google: RedirectUrlType
+}
+
+"""Redirect Url"""
+type RedirectUrlType {
+  """Url"""
+  url: String!
+}
+
+"""New user data"""
+type UserWithToken {
+  """Token"""
+  accessToken: String!
+
+  """User's email"""
+  email: String
+
+  """Refresh Token"""
+  refreshToken: String
+}
