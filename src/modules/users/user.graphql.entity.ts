@@ -1,6 +1,20 @@
 import 'reflect-metadata';
 import { ArgsType, Field, ID, ObjectType } from '@nestjs/graphql';
 
+@ObjectType({
+  description: 'User object that is publicly accessible.',
+})
+export class User {
+  @Field(() => ID, { description: 'A unique identifier for the user' })
+  id: number;
+
+  @Field({ description: "User's email" })
+  email: string;
+
+  @Field({ description: 'The date this user was created' })
+  createdAt: Date;
+}
+
 @ObjectType({ description: 'New user data' })
 export class UserWithToken {
   @Field({ description: "User's email", nullable: true })

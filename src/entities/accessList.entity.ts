@@ -6,7 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Users } from './user.entity';
+import { User } from './user.entity';
 import { Field, ID } from '@nestjs/graphql';
 import { AccessEnum } from 'src/enums/access.enum';
 
@@ -22,10 +22,10 @@ export class AccessList extends BaseEntity {
   @Column('int')
   userId: number;
 
-  @ManyToOne(() => Users, (user) => user.accesList)
-  user: Users;
+  @ManyToOne(() => User, (user) => user.accesList)
+  user: User;
 
-  @Column({ type: 'enum', enum: AccessEnum })
+  @Column({ type: 'enum', enum: AccessEnum, default: AccessEnum.VIEW })
   accessType: string;
 
   @Column('varchar')

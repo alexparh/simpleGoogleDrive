@@ -9,38 +9,44 @@ import { Repository } from 'typeorm';
 import { UserWithTokenType } from '../../types/user.type';
 import { AuthService } from '../auth/auth.service';
 import { RefreshToken } from './user.graphql.entity';
-import { Users } from '../../entities/user.entity';
+import { User } from '../../entities/user.entity';
+import { FolderService } from '../folders/folder.service';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(Users)
-    private usersRepository: Repository<Users>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     @Inject(forwardRef(() => AuthService))
     private authService: AuthService,
+    @Inject(forwardRef(() => FolderService))
+    private folderService: FolderService,
   ) {}
 
-  getRepository(): Repository<Users> {
-    return this.usersRepository;
+  getRepository(): Repository<User> {
+    return this.userRepository;
   }
 
-  async findOneBy(where: object): Promise<Users | null> {
-    return this.usersRepository.findOne({ where });
+  async findOneBy(where: object): Promise<User | null> {
+    return this.userRepository.findOne({ where });
   }
 
-  findOneById(id: number): Promise<Users | null> {
+  findOneById(id: number): Promise<User | null> {
     return this.findOneBy({ id });
   }
 
-  findOneByEmail(email: string | undefined): Promise<Users | null> {
+  findOneByEmail(email: string | undefined): Promise<User | null> {
     return this.findOneBy({ email });
   }
 
-  async createExternal(email: string): Promise<Users> {
-    return this.usersRepository.save({ email });
+  async create(email: string): Promise<User> {
+    const { id } = await this.userRepository.save({ email });
+    const { id: rootFolderId } =
+      await this.folderService.createRootUserFolder(id);
+    return this.userRepository.save({ id, rootFolderId });
   }
 
-  private async _loginByUser(user: Users | null) {
+  private async _loginByUser(user: User | null) {
     if (!user) throw new UnauthorizedException('User unauthorized');
 
     const tokens = await this.authService.login(user);
@@ -48,7 +54,7 @@ export class UsersService {
   }
 
   async updateRefresh(userId: number, refreshToken: string): Promise<void> {
-    await this.usersRepository.update({ id: userId }, { refreshToken });
+    await this.userRepository.update({ id: userId }, { refreshToken });
   }
 
   async refresh(args: RefreshToken): Promise<UserWithTokenType> {

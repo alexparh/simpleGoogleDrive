@@ -7,14 +7,15 @@ import {
   Entity,
   ManyToMany,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Files } from './file.entity';
-import { Folders } from './folder.entity';
+import { File } from './file.entity';
+import { Folder } from './folder.entity';
 import { AccessList } from './accessList.entity';
 
 @Entity()
-export class Users extends BaseEntity {
+export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   @Field(() => ID, { description: 'A unique identifier for the user' })
   id: number;
@@ -31,12 +32,15 @@ export class Users extends BaseEntity {
   @Field({ description: 'The date this user was created' })
   createdAt: Date;
 
-  @OneToMany(() => Files, (file) => file.user)
-  files: Files[];
+  @OneToMany(() => File, (file) => file.user)
+  files: File[];
 
-  @OneToMany(() => Files, (folder) => folder.user)
-  folders: Folders[];
+  @OneToMany(() => Folder, (folder) => folder.user)
+  folders: Folder[];
 
   @OneToMany(() => AccessList, (accesList) => accesList.user)
   accesList: AccessList[];
+
+  @OneToOne(() => Folder, (folder) => folder.id)
+  rootFolderId: number;
 }

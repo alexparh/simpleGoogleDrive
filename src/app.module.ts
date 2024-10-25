@@ -8,6 +8,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { FolderModule } from './modules/folders/folders.module';
+import { FileModule } from './modules/files/file.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     AuthModule,
     UsersModule,
+    FolderModule,
+    FileModule,
   ],
 })
 export class AppModule {}

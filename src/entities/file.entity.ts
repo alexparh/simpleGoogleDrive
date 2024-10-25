@@ -7,12 +7,13 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Users } from './user.entity';
+import { User } from './user.entity';
+import { Folder } from './folder.entity';
 import { Field, ID } from '@nestjs/graphql';
 import { ViewEnum } from 'src/enums/view.enum';
 
 @Entity()
-export class Files extends BaseEntity {
+export class File extends BaseEntity {
   @PrimaryGeneratedColumn()
   @Field(() => ID, { description: 'A unique identifier for log' })
   id: number;
@@ -26,12 +27,21 @@ export class Files extends BaseEntity {
   @Column('int')
   userId: number;
 
-  @Column({ type: 'enum', enum: ViewEnum })
+  @Column('int')
+  folderId: number;
+
+  @Column({ type: 'enum', enum: ViewEnum, default: ViewEnum.PRIVATE })
   viewType: string;
 
   @Column('varchar')
   path: string;
 
-  @ManyToOne(() => Users, (user) => user.files)
-  user: Users;
+  @ManyToOne(() => User, (user) => user.files)
+  user: User;
+
+  @ManyToOne(() => Folder, (folder) => folder.files, {
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  folder: Folder;
 }

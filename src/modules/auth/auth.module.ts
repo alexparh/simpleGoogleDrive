@@ -7,6 +7,8 @@ import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './strategies/jwt.auth.strategy';
 import { GoogleStrategy } from './strategies/google.oauth.strategy';
 import { AuthResolver } from './auth.resolver';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from 'src/guards/jwt.auth.guard';
 
 @Module({
   imports: [
@@ -23,7 +25,16 @@ import { AuthResolver } from './auth.resolver';
     PassportModule,
     forwardRef(() => UsersModule),
   ],
-  providers: [AuthResolver, AuthService, JwtStrategy, GoogleStrategy],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    AuthResolver,
+    AuthService,
+    JwtStrategy,
+    GoogleStrategy,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

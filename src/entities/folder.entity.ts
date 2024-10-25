@@ -7,17 +7,18 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Users } from './user.entity';
+import { User } from './user.entity';
 import { Field, ID } from '@nestjs/graphql';
+import { File } from './file.entity';
 
 @Entity()
-export class Folders extends BaseEntity {
+export class Folder extends BaseEntity {
   @PrimaryGeneratedColumn()
   @Field(() => ID, { description: 'A unique identifier for log' })
   id: number;
 
-  @Column('int')
-  folderId: number;
+  @Column('int', { nullable: true })
+  parentFolderId: number;
 
   @Column('varchar')
   name: string;
@@ -31,9 +32,18 @@ export class Folders extends BaseEntity {
   @Column('varchar')
   path: string;
 
-  @ManyToOne(() => Users, (user) => user.folders)
-  user: Users;
+  @OneToMany(() => File, (file) => file.folder, { cascade: true })
+  files: File[];
 
-  @ManyToOne(() => Folders, (folder) => folder.folder)
-  folder: Folders;
+  @ManyToOne(() => User, (user) => user.folders)
+  user: User;
+
+  @ManyToOne(() => Folder, (folder) => folder.subfolders, {
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  parentFolder: Folder;
+
+  @OneToMany(() => Folder, (folder) => folder.parentFolder, { cascade: true })
+  subfolders: Folder[];
 }

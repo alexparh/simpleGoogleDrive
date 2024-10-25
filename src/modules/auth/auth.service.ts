@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
-import { Users } from '../../entities/user.entity';
+import { User } from '../../entities/user.entity';
 import {
   AccessRefreshTokenType,
   ExternalDataType,
@@ -16,7 +16,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async createTokenForUser(user: Users): Promise<AccessRefreshTokenType> {
+  async createTokenForUser(user: User): Promise<AccessRefreshTokenType> {
     const payload = { id: user.id };
     const accessToken = await this.jwtService.signAsync(payload);
 
@@ -27,7 +27,7 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async login(user: Users): Promise<AccessRefreshTokenType> {
+  async login(user: User): Promise<AccessRefreshTokenType> {
     return this.createTokenForUser(user);
   }
 
@@ -36,10 +36,10 @@ export class AuthService {
 
     const existsUser = await this.usersService.findOneByEmail(email);
 
-    const user = existsUser || (await this.usersService.createExternal(email));
+    const user = existsUser || (await this.usersService.create(email));
     if (!user) throw new NotFoundException('User not found');
 
-    const loginData = await this.login(user as Users);
+    const loginData = await this.login(user as User);
     return { ...user, ...loginData };
   }
 }
