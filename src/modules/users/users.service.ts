@@ -11,6 +11,7 @@ import { AuthService } from '../auth/auth.service';
 import { RefreshToken } from './user.graphql.entity';
 import { User } from '../../entities/user.entity';
 import { FolderService } from '../folders/folder.service';
+import { AccessList } from 'src/entities/accessList.entity';
 
 @Injectable()
 export class UsersService {
@@ -31,11 +32,11 @@ export class UsersService {
     return this.userRepository.findOne({ where });
   }
 
-  findOneById(id: number): Promise<User | null> {
+  async findOneById(id: number): Promise<User | null> {
     return this.findOneBy({ id });
   }
 
-  findOneByEmail(email: string | undefined): Promise<User | null> {
+  async findOneByEmail(email: string | undefined): Promise<User | null> {
     return this.findOneBy({ email });
   }
 

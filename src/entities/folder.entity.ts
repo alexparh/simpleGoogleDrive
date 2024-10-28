@@ -10,6 +10,7 @@ import {
 import { User } from './user.entity';
 import { Field, ID } from '@nestjs/graphql';
 import { File } from './file.entity';
+import { AccessList } from './accessList.entity';
 
 @Entity()
 export class Folder extends BaseEntity {
@@ -46,4 +47,9 @@ export class Folder extends BaseEntity {
 
   @OneToMany(() => Folder, (folder) => folder.parentFolder, { cascade: true })
   subfolders: Folder[];
+
+  @OneToMany(() => AccessList, (accesList) => accesList.folder, {
+    cascade: true,
+  })
+  accesList: AccessList[];
 }

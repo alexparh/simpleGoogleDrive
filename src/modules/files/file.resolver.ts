@@ -20,6 +20,13 @@ import { AuthenticatedAuthGuard } from 'src/guards/authenticated.auth.guard';
 export class FileResolver {
   constructor(private fileService: FileService) {}
 
+  @Query(() => File, { name: 'folder', nullable: true })
+  findOneById(@Args('id', { type: () => ID, nullable: true }) id?: number) {
+    return this.fileService.findOneBy({
+      ...(id && { id }),
+    });
+  }
+
   @Query('downloadFile')
   async download(@Args() args: FileDownload): Promise<Stream> {
     return this.fileService.load(args);
@@ -43,7 +50,7 @@ export class FileResolver {
 
   @Mutation(() => File, { name: 'updateFile', nullable: true })
   @UseGuards(AuthenticatedAuthGuard)
-  async rename(@Args() args: FileUpdate) {
+  async update(@Args() args: FileUpdate) {
     return this.fileService.update(args);
   }
 

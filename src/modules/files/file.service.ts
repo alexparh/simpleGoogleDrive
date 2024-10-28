@@ -22,8 +22,10 @@ import { Ok } from 'src/system/system.graphql.entity';
 import { isValidFolderOrFileName } from '../../utils/nameValidation';
 import { FolderService } from '../folders/folder.service';
 import { createWriteStream, createReadStream, ReadStream } from 'fs';
+import { AccessService } from '../access/access.service';
 
 const storagePath = join(__dirname, '..', '..', 'storage');
+const relations = ['accessList'];
 
 @Injectable()
 export class FileService {
@@ -32,6 +34,8 @@ export class FileService {
     private fileRepository: Repository<File>,
     @Inject(forwardRef(() => FolderService))
     private folderService: FolderService,
+    @Inject(AccessService)
+    private accessService: AccessService,
   ) {}
 
   getRepository(): Repository<File> {
@@ -46,6 +50,7 @@ export class FileService {
   async findOneBy(where: any): Promise<File | null> {
     return this.fileRepository.findOne({
       where,
+      relations,
     });
   }
 
@@ -126,19 +131,33 @@ export class FileService {
   }
 
   async update(args: updateFileType): Promise<File | null> {
-    const { id } = args;
-    const file = await this.findOneById(id);
-    if (args.name) {
+    const file = await this.findOneById(args.id);
+    if (!file) return null;
+    const { accesList, ...fileArgs } = args;
+    const { id, name } = fileArgs;
+
+    if (name) {
       const absolutePath = await this.getAbsolutePathById(id);
       try {
         await access(absolutePath);
-        await rename(absolutePath, join(dirname(absolutePath), args.name));
+        await rename(absolutePath, join(dirname(absolutePath), name));
       } catch (Err) {
         throw new InternalServerErrorException(`Unable to rename file: ${Err}`);
       }
     }
 
-    return this.fileRepository.save({ ...file, ...args });
+    await this.fileRepository.update({ id }, fileArgs);
+
+    if (accesList) {
+      await Promise.all([
+        this.accessService.clearAccess({ fielId: id }),
+        ...accesList.map((el) =>
+          this.accessService.createAccess({ fileId: id, ...el }),
+        ),
+      ]);
+    }
+
+    return this.findOneById(id);
   }
 
   async delete(args: deleteFileType): Promise<Ok> {

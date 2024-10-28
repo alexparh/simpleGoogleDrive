@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { ArgsType, Field, ID, ObjectType } from '@nestjs/graphql';
 import { File } from '../files/file.graphql.entity';
+import { Access, AddAccess } from '../access/access.graphql.entity';
 
 @ObjectType()
 export class Folder {
@@ -27,6 +28,9 @@ export class Folder {
 
   @Field(() => [Folder], { description: 'Subfolders', nullable: true })
   subFolders?: Folder[];
+
+  @Field(() => [Access], { description: 'Access list', nullable: true })
+  accessList?: Access[];
 }
 
 @ArgsType()
@@ -57,6 +61,9 @@ export class FolderUpdate {
 
   @Field({ description: 'New name', nullable: true })
   name: string;
+
+  @Field(() => [AddAccess], { description: 'New access list', nullable: true })
+  accessList?: AddAccess[];
 }
 
 @ArgsType()

@@ -19,9 +19,10 @@ import { access, mkdir, rename, rm, cp } from 'fs/promises';
 import { Ok } from 'src/system/system.graphql.entity';
 import { isValidFolderOrFileName } from '../../utils/nameValidation';
 import { FileService } from '../files/file.service';
+import { AccessService } from '../access/access.service';
 
 const storagePath = join(__dirname, '..', '..', 'storage');
-const relations = ['subfolders', 'files'];
+const relations = ['subfolders', 'files', 'accessList'];
 
 @Injectable()
 export class FolderService {
@@ -30,6 +31,8 @@ export class FolderService {
     private folderRepository: Repository<Folder>,
     @Inject(forwardRef(() => FileService))
     private fileService: FileService,
+    @Inject(AccessService)
+    private accessService: AccessService,
   ) {}
 
   getRepository(): Repository<Folder> {
@@ -118,17 +121,36 @@ export class FolderService {
     return newFolder;
   }
 
-  async rename(args: updateFolderType): Promise<Folder | null> {
-    const { id, name } = args;
-    const absolutePath = await this.getAbsolutePathById(id);
-    try {
-      await access(absolutePath);
-      await rename(absolutePath, join(dirname(absolutePath), name));
-    } catch (Err) {
-      throw new InternalServerErrorException(`Unable to rename folder: ${Err}`);
+  async update(args: updateFolderType): Promise<Folder | null> {
+    const folder = await this.findOneById(args.id);
+    if (!folder) return null;
+
+    const { accesList, ...folderArgs } = args;
+    const { id, name } = folderArgs;
+
+    if (name) {
+      const absolutePath = await this.getAbsolutePathById(id);
+      try {
+        await access(absolutePath);
+        await rename(absolutePath, join(dirname(absolutePath), args.name));
+      } catch (Err) {
+        throw new InternalServerErrorException(
+          `Unable to rename fodler: ${Err}`,
+        );
+      }
     }
 
-    await this.folderRepository.update({ id }, { name });
+    await this.folderRepository.update({ id }, folderArgs);
+
+    if (accesList) {
+      await Promise.all([
+        this.accessService.clearAccess({ folderId: id }),
+        ...accesList.map((el) =>
+          this.accessService.createAccess({ folderId: id, ...el }),
+        ),
+      ]);
+    }
+
     return this.findOneById(id);
   }
 

@@ -38,8 +38,8 @@ export class FolderResolver {
 
   @Mutation(() => Folder, { name: 'updateFolder', nullable: true })
   @UseGuards(AuthenticatedAuthGuard)
-  async rename(@Args() args: FolderUpdate) {
-    return this.folderService.rename(args);
+  async update(@Args() args: FolderUpdate) {
+    return this.folderService.update(args);
   }
 
   @Mutation(() => Ok, { name: 'deleteFolder', nullable: true })

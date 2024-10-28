@@ -10,6 +10,7 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FolderModule } from './modules/folders/folders.module';
 import { FileModule } from './modules/files/file.module';
+import { AccessModule } from './modules/access/access.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { FileModule } from './modules/files/file.module';
     UsersModule,
     FolderModule,
     FileModule,
+    AccessModule,
   ],
 })
 export class AppModule {}

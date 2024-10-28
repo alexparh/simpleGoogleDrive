@@ -11,6 +11,7 @@ import { User } from './user.entity';
 import { Folder } from './folder.entity';
 import { Field, ID } from '@nestjs/graphql';
 import { ViewEnum } from 'src/enums/view.enum';
+import { AccessList } from './accessList.entity';
 
 @Entity()
 export class File extends BaseEntity {
@@ -44,4 +45,7 @@ export class File extends BaseEntity {
     nullable: true,
   })
   folder: Folder;
+
+  @OneToMany(() => AccessList, (accesList) => accesList.file, { cascade: true })
+  accesList: AccessList[];
 }

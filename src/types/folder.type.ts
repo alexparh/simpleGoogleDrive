@@ -1,3 +1,5 @@
+import { Access } from './access.type';
+
 export type createFolderType = {
   name: string;
   parentFolderId: number;
@@ -11,6 +13,7 @@ export type cloneFolderType = {
 export type updateFolderType = {
   id: number;
   name: string;
+  accesList?: Access[];
 };
 
 export type deleteFolderType = {

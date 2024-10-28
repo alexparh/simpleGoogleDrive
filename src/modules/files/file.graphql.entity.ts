@@ -7,6 +7,7 @@ import {
   registerEnumType,
 } from '@nestjs/graphql';
 import { ViewEnum } from 'src/enums/view.enum';
+import { Access, AddAccess } from '../access/access.graphql.entity';
 
 registerEnumType(ViewEnum, {
   name: 'View',
@@ -34,6 +35,9 @@ export class File {
 
   @Field({ description: 'Public or private view' })
   viewType: ViewEnum;
+
+  @Field(() => [Access], { description: 'Access list', nullable: true })
+  accessList?: Access[];
 }
 
 @ArgsType()
@@ -71,6 +75,9 @@ export class FileUpdate {
 
   @Field({ description: 'Public or private view', nullable: true })
   viewType?: ViewEnum;
+
+  @Field(() => [AddAccess], { description: 'New access list', nullable: true })
+  accessList?: AddAccess[];
 }
 
 @ArgsType()

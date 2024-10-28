@@ -4,10 +4,15 @@ import { Folder } from 'src/entities/folder.entity';
 import { FolderResolver } from './folders.resolver';
 import { FolderService } from './folder.service';
 import { FileModule } from '../files/file.module';
+import { AccessModule } from '../access/access.module';
 
 @Module({
   providers: [FolderResolver, FolderService],
-  imports: [TypeOrmModule.forFeature([Folder]), forwardRef(() => FileModule)],
+  imports: [
+    TypeOrmModule.forFeature([Folder]),
+    forwardRef(() => FileModule),
+    AccessModule,
+  ],
   exports: [FolderService],
 })
 export class FolderModule {}
