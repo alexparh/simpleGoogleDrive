@@ -11,7 +11,7 @@ if (process.env.NODE_ENV === 'test')
 
 const dataSourceObj = new DataSource({
   ...database,
-  type: 'mysql',
+  type: 'postgres',
   entities,
   migrations: [join(process.cwd(), 'dist/database/migrations/**/*.js')],
   synchronize: true,

@@ -2,7 +2,129 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""Access to file/folder"""
+type Access {
+  """Access type"""
+  accessType: String!
+
+  """The date the access was created"""
+  createdAt: DateTime!
+
+  """File id"""
+  fileId: ID
+
+  """Folder id"""
+  folderId: ID
+
+  """A unique identifier for access to file/folder"""
+  id: ID!
+
+  """Folder or file path"""
+  path: String
+
+  """User id"""
+  userId: ID!
+}
+
+"""Add access to file/folder"""
+input AddAccess {
+  """Access type"""
+  accessType: String!
+
+  """User email"""
+  email: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type File {
+  """Access list"""
+  accessList: [Access!]
+
+  """The date the folder was created"""
+  createdAt: DateTime!
+
+  """Folder id"""
+  folderId: ID!
+
+  """A unique identifier for the folder"""
+  id: ID!
+
+  """Folder name"""
+  name: String!
+
+  """Folder path"""
+  path: String!
+
+  """Folder creator id"""
+  userId: ID!
+
+  """Public or private view"""
+  viewType: String!
+}
+
+type Folder {
+  """Access list"""
+  accessList: [Access!]
+
+  """The date the folder was created"""
+  createdAt: DateTime!
+
+  """Images"""
+  files: [File!]
+
+  """A unique identifier for the folder"""
+  id: ID!
+
+  """Folder name"""
+  name: String!
+
+  """Parent folder id"""
+  parentFolderId: ID
+
+  """Folder path"""
+  path: String!
+
+  """Subfolders"""
+  subFolders: [Folder!]
+
+  """Folder creator id"""
+  userId: ID!
+}
+
 type Mutation {
+  copyFile(
+    """Folder id"""
+    folderId: ID!
+
+    """A unique identifier for the file"""
+    id: ID!
+  ): File
+  copyFolder(
+    """A unique identifier for the fodler"""
+    id: ID!
+
+    """Parent folder id"""
+    parentFolderId: ID!
+  ): Folder
+  createFolder(
+    """Name"""
+    name: String!
+
+    """Parent folder id"""
+    parentFolderId: ID!
+  ): Folder
+  deleteFile(
+    """A unique identifier for the file"""
+    id: ID!
+  ): Ok
+  deleteFolder(
+    """A unique identifier for the folder"""
+    id: ID!
+  ): Ok
   google(
     """Auth user flag"""
     authuser: String!
@@ -23,10 +145,47 @@ type Mutation {
     """Refresh token"""
     refreshToken: String!
   ): UserWithToken
+  updateFile(
+    """New access list"""
+    accessList: [AddAccess!]
+
+    """A unique identifier for the file"""
+    id: ID!
+
+    """Name"""
+    name: String
+
+    """Public or private view"""
+    viewType: String
+  ): File
+  updateFolder(
+    """New access list"""
+    accessList: [AddAccess!]
+
+    """A unique identifier for the fodler"""
+    id: ID!
+
+    """New name"""
+    name: String
+  ): Folder
+  uploadFile(
+    file: Upload!
+
+    """Folder id"""
+    folderId: ID!
+  ): File
+}
+
+"""Ok result"""
+type Ok {
+  """Ok flag"""
+  ok: Boolean!
 }
 
 type Query {
+  folder(id: ID): File
   google: RedirectUrlType
+  search(name: String!): SearchResult
 }
 
 """Redirect Url"""
@@ -34,6 +193,20 @@ type RedirectUrlType {
   """Url"""
   url: String!
 }
+
+type SearchResult {
+  """Search result entity"""
+  entity: String!
+
+  """A unique identifier for the folder"""
+  id: ID!
+
+  """Name"""
+  name: String!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 """New user data"""
 type UserWithToken {

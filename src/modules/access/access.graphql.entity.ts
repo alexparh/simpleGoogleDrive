@@ -3,6 +3,7 @@ import {
   ArgsType,
   Field,
   ID,
+  InputType,
   ObjectType,
   registerEnumType,
 } from '@nestjs/graphql';
@@ -38,7 +39,7 @@ export class Access {
   accessType: AccessEnum;
 }
 
-@ArgsType()
+@InputType({ description: 'Add access to file/folder' })
 export class AddAccess {
   @Field({ description: 'User email' })
   email: string;

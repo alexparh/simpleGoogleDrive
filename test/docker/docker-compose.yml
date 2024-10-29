@@ -1,15 +1,17 @@
-version: '3'
-
 services:
-  simple-google-drive-mysql:
-    image: mysql:latest
+  simple_google_drive_postgres:
+    container_name: simple_google_drive_postgres
+    image: postgres:latest
     restart: unless-stopped
     environment:
-      - MYSQL_DATABASE=simpleGoogleDrive
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=password
-      - MYSQL_ROOT_PASSWORD=password
+      - POSTGRES_HOST=simple_google_drive_postgres
+      - POSTGRES_PORT=3306
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=simple_google_drive
+      - PGDATA=/var/lib/postgresql/data/simpleGoogleDrive
+      - PGUSER=postgres
     ports:
-      - 3306:3306
+      - 5432:5432
     volumes:
-      - ./data/mysql:/var/lib/mysql
+      - ./data/db:/var/lib/postgresql/simpleGoogleDrive

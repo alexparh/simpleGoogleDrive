@@ -1,10 +1,10 @@
 version: '3'
 
 services:
-  simple-google-drive-mysql:
+  simple-google-drive-postgres:
     extends:
       file: /test/docker/docker-compose.yml
-      service: simple-google-drive-mysql
+      service: simple-google-drive-postgres
 
   simple-google-drive:
     image: node:20
@@ -22,4 +22,4 @@ services:
       - ../tsconfig.build.json:/app/tsconfig.build.json
       - ../tsconfig.json:/app/tsconfig.json
     depends_on:
-      - simple-google-drive-mysql
+      - simple-google-drive-postgres

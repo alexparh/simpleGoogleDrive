@@ -27,10 +27,10 @@ export class FileResolver {
     });
   }
 
-  @Query('downloadFile')
-  async download(@Args() args: FileDownload): Promise<Stream> {
-    return this.fileService.load(args);
-  }
+  // @Query(() => Stream, { name: 'downloadFile' })
+  // async download(@Args() args: FileDownload): Promise<Stream> {
+  //   return this.fileService.load(args);
+  // }
 
   @Mutation(() => File, { name: 'uploadFile', nullable: true })
   @UseGuards(AuthenticatedAuthGuard)
