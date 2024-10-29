@@ -70,11 +70,18 @@ export class FolderService {
       throw new InternalServerErrorException(`Unable to create folder: ${Err}`);
     }
 
-    return this.folderRepository.save({
+    const newFolder = await this.folderRepository.save({
       ...args,
       path,
       userId,
     });
+
+    await this.accessService.addAccessFromParentFolder({
+      parentFolderId,
+      folderId: newFolder.id,
+    });
+
+    return newFolder;
   }
 
   async createRootUserFolder(userId: number): Promise<Folder> {
@@ -107,16 +114,14 @@ export class FolderService {
       userId,
     );
 
-    for (const { id } of folder.files) {
-      this.fileService.copy({ id, folderId: newFolder.id }, userId);
-    }
-
-    for (const subfolder of folder.subfolders) {
-      await this.copy(
-        { id: subfolder.id, parentFolderId: newFolder.id },
-        userId,
-      );
-    }
+    await Promise.all([
+      ...folder.files.map(({ id }) =>
+        this.fileService.copy({ id, folderId: newFolder.id }, userId),
+      ),
+      ...folder.subfolders.map(({ id }) =>
+        this.copy({ id, parentFolderId: newFolder.id }, userId),
+      ),
+    ]);
 
     return newFolder;
   }

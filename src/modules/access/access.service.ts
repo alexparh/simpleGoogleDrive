@@ -2,7 +2,11 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AccessList } from 'src/entities/accessList.entity';
-import { ClearAccess, CreateAccess } from 'src/types/access.type';
+import {
+  ClearAccess,
+  CreateAccess,
+  AddParentFolderAccess,
+} from 'src/types/access.type';
 import { Ok } from 'src/system/system.graphql.entity';
 import { Access } from './access.graphql.entity';
 import { UsersService } from '../users/users.service';
@@ -24,6 +28,21 @@ export class AccessService {
     }
 
     return this.accessRepository.save({ userId: user.id, ...args });
+  }
+
+  async addAccessFromParentFolder(args: AddParentFolderAccess): Promise<void> {
+    const { parentFolderId, ...accessArgs } = args;
+    const parentFolderAccess = await this.accessRepository.find({
+      where: { folderId: parentFolderId },
+    });
+
+    await this.accessRepository.save(
+      parentFolderAccess.map(({ userId, accessType }) => ({
+        userId,
+        accessType,
+        ...accessArgs,
+      })),
+    );
   }
 
   async clearAccess(args: ClearAccess): Promise<Ok> {

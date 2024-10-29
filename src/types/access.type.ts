@@ -16,3 +16,9 @@ export type CreateAccess = {
   folderId?: number;
   fileId?: number;
 };
+
+export type AddParentFolderAccess = {
+  folderId?: number;
+  fileId?: number;
+  parentFolderId: number;
+};

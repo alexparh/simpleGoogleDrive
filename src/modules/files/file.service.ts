@@ -100,11 +100,18 @@ export class FileService {
       throw new InternalServerErrorException(`Unable to upload file: ${Err}`);
     }
 
-    return this.fileRepository.save({
+    const newFile = await this.fileRepository.save({
       ...args,
       path,
       userId,
     });
+
+    await this.accessService.addAccessFromParentFolder({
+      parentFolderId: folderId,
+      fileId: newFile.id,
+    });
+
+    return newFile;
   }
 
   async copy(args: cloneFileType, userId: number): Promise<File> {
@@ -122,12 +129,19 @@ export class FileService {
       throw new InternalServerErrorException(`Unable to copy file: ${Err}`);
     }
 
-    return this.fileRepository.save({
+    const newFileCopy = await this.fileRepository.save({
       name,
       folderId,
       userId,
       path: copyFilePath,
     });
+
+    await this.accessService.addAccessFromParentFolder({
+      parentFolderId: folderId,
+      fileId: newFileCopy.id,
+    });
+
+    return newFileCopy;
   }
 
   async update(args: updateFileType): Promise<File | null> {
