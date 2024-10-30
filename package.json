@@ -1,5 +1,5 @@
 {
-  "name": "simpleGoogleDrive",
+  "name": "simple_google_drive",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -17,7 +17,10 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "migration:run": "nest build && typeorm -d dist/database/datasource.provider.js migration:run",
+    "migration:revert": "typeorm -d dist/database/datasource.provider.js migration:revert",
+    "migration:create": "cd src/database/migrations && typeorm migration:create"
   },
   "dependencies": {
     "@apollo/server": "^4.11.0",

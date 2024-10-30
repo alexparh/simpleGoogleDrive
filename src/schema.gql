@@ -66,6 +66,11 @@ type File {
   viewType: String!
 }
 
+type FileLink {
+  """File download link"""
+  downloadLink: String!
+}
+
 type Folder {
   """Access list"""
   accessList: [Access!]
@@ -183,6 +188,10 @@ type Ok {
 }
 
 type Query {
+  downloadFile(
+    """File id"""
+    id: ID!
+  ): FileLink!
   folder(id: ID): File
   google: RedirectUrlType
   search(name: String!): SearchResult

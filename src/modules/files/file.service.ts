@@ -23,7 +23,7 @@ import { access, rename, unlink, copyFile } from 'fs/promises';
 import { Ok } from 'src/system/system.graphql.entity';
 import { isValidFolderOrFileName } from '../../utils/nameValidation';
 import { FolderService } from '../folders/folder.service';
-import { createWriteStream, createReadStream, ReadStream } from 'fs';
+import { createWriteStream } from 'fs';
 import { AccessService } from '../access/access.service';
 import { UsersService } from '../users/users.service';
 import config from '../../config';
@@ -50,7 +50,7 @@ export class FileService {
     private folderService: FolderService,
     @Inject(AccessService)
     private accessService: AccessService,
-    @Inject(UsersService)
+    @Inject(forwardRef(() => UsersService))
     private userService: UsersService,
   ) {}
 
