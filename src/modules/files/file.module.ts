@@ -5,12 +5,14 @@ import { FolderModule } from '../folders/folders.module';
 import { FileResolver } from './file.resolver';
 import { FileService } from './file.service';
 import { AccessModule } from '../access/access.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   providers: [FileResolver, FileService],
   imports: [
     TypeOrmModule.forFeature([File]),
     forwardRef(() => FolderModule),
+    forwardRef(() => UsersModule),
     AccessModule,
   ],
   exports: [FileService],

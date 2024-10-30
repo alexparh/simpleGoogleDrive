@@ -41,6 +41,6 @@ export class User extends BaseEntity {
   @OneToMany(() => AccessList, (accesList) => accesList.user)
   accesList: AccessList[];
 
-  @OneToOne(() => Folder, (folder) => folder.id)
+  @Column('int', { nullable: true })
   rootFolderId: number;
 }

@@ -17,7 +17,7 @@ export type updateFileType = {
   id: number;
   name?: string;
   viewType?: ViewEnum;
-  accesList?: Access[];
+  accessList?: Access[];
 };
 
 export type deleteFileType = {

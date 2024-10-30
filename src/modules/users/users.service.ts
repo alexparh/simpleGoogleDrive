@@ -6,12 +6,16 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserWithTokenType } from '../../types/user.type';
+import {
+  CreateAccessListUsers,
+  UserWithTokenType,
+} from '../../types/user.type';
 import { AuthService } from '../auth/auth.service';
 import { RefreshToken } from './user.graphql.entity';
 import { User } from '../../entities/user.entity';
 import { FolderService } from '../folders/folder.service';
 import { AccessList } from 'src/entities/accessList.entity';
+import { Access } from 'src/types/access.type';
 
 @Injectable()
 export class UsersService {
@@ -45,6 +49,22 @@ export class UsersService {
     const { id: rootFolderId } =
       await this.folderService.createRootUserFolder(id);
     return this.userRepository.save({ id, rootFolderId });
+  }
+
+  async createNewUsersFromAccessList(accessList: Access[]) {
+    return Promise.all(
+      accessList.map(async ({ email, accessType }) => {
+        let user = await this.findOneByEmail(email);
+        if (!user) {
+          user = await this.create(email);
+        }
+
+        return {
+          userId: user.id,
+          accessType,
+        };
+      }),
+    );
   }
 
   private async _loginByUser(user: User | null) {

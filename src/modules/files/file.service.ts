@@ -23,6 +23,7 @@ import { isValidFolderOrFileName } from '../../utils/nameValidation';
 import { FolderService } from '../folders/folder.service';
 import { createWriteStream, createReadStream, ReadStream } from 'fs';
 import { AccessService } from '../access/access.service';
+import { UsersService } from '../users/users.service';
 
 const storagePath = join(__dirname, '..', '..', 'storage');
 const relations = ['accessList'];
@@ -36,6 +37,8 @@ export class FileService {
     private folderService: FolderService,
     @Inject(AccessService)
     private accessService: AccessService,
+    @Inject(UsersService)
+    private userService: UsersService,
   ) {}
 
   getRepository(): Repository<File> {
@@ -147,7 +150,7 @@ export class FileService {
   async update(args: updateFileType): Promise<File | null> {
     const file = await this.findOneById(args.id);
     if (!file) return null;
-    const { accesList, ...fileArgs } = args;
+    const { accessList, ...fileArgs } = args;
     const { id, name } = fileArgs;
 
     if (name) {
@@ -162,13 +165,20 @@ export class FileService {
 
     await this.fileRepository.update({ id }, fileArgs);
 
-    if (accesList) {
-      await Promise.all([
-        this.accessService.clearAccess({ fielId: id }),
-        ...accesList.map((el) =>
-          this.accessService.createAccess({ fileId: id, ...el }),
+    if (accessList) {
+      await this.accessService.clearAccess({ fielId: id });
+
+      const mappedAccessList =
+        await this.userService.createNewUsersFromAccessList(accessList);
+
+      await Promise.all(
+        mappedAccessList.map((el) =>
+          this.accessService.createAccess({
+            fileId: id,
+            ...el,
+          }),
         ),
-      ]);
+      );
     }
 
     return this.findOneById(id);

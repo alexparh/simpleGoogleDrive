@@ -50,4 +50,7 @@ export class AccessList extends BaseEntity {
 
   @Column('varchar', { nullable: true })
   path?: string;
+
+  @Column('int', { nullable: true })
+  parentAccessFolderId: number;
 }

@@ -13,6 +13,7 @@ import {
   cloneFolderType,
   updateFolderType,
   deleteFolderType,
+  setFolderAccesss,
 } from '../../types/folder.type';
 import { join, dirname } from 'path';
 import { access, mkdir, rename, rm, cp } from 'fs/promises';
@@ -20,6 +21,7 @@ import { Ok } from 'src/system/system.graphql.entity';
 import { isValidFolderOrFileName } from '../../utils/nameValidation';
 import { FileService } from '../files/file.service';
 import { AccessService } from '../access/access.service';
+import { UsersService } from '../users/users.service';
 
 const storagePath = join(__dirname, '..', '..', 'storage');
 const relations = ['subfolders', 'files', 'accessList'];
@@ -33,6 +35,8 @@ export class FolderService {
     private fileService: FileService,
     @Inject(AccessService)
     private accessService: AccessService,
+    @Inject(UsersService)
+    private userService: UsersService,
   ) {}
 
   getRepository(): Repository<Folder> {
@@ -126,11 +130,37 @@ export class FolderService {
     return newFolder;
   }
 
+  async setFolderAccesss(args: setFolderAccesss) {
+    const { folderId, isRoot, ...folderAccessArgs } = args;
+    const folder = await this.findOneById(folderId);
+
+    await this.accessService.createAccess({
+      folderId,
+      ...folderAccessArgs,
+      parentAccessFolderId: isRoot ? null : args.parentAccessFolderId,
+    });
+
+    await Promise.all([
+      ...folder.files.map(({ id }) =>
+        this.accessService.createAccess({
+          fileId: id,
+          ...folderAccessArgs,
+        }),
+      ),
+      ...folder.subfolders.map(({ id }) =>
+        this.setFolderAccesss({
+          folderId: id,
+          ...folderAccessArgs,
+        }),
+      ),
+    ]);
+  }
+
   async update(args: updateFolderType): Promise<Folder | null> {
     const folder = await this.findOneById(args.id);
     if (!folder) return null;
 
-    const { accesList, ...folderArgs } = args;
+    const { accessList, ...folderArgs } = args;
     const { id, name } = folderArgs;
 
     if (name) {
@@ -147,13 +177,22 @@ export class FolderService {
 
     await this.folderRepository.update({ id }, folderArgs);
 
-    if (accesList) {
-      await Promise.all([
-        this.accessService.clearAccess({ folderId: id }),
-        ...accesList.map((el) =>
-          this.accessService.createAccess({ folderId: id, ...el }),
+    if (accessList) {
+      await this.accessService.clearAccess({ folderId: id });
+
+      const mappedAccessList =
+        await this.userService.createNewUsersFromAccessList(accessList);
+
+      await Promise.all(
+        mappedAccessList.map((el) =>
+          this.setFolderAccesss({
+            isRoot: true,
+            folderId: id,
+            parentAccessFolderId: id,
+            ...el,
+          }),
         ),
-      ]);
+      );
     }
 
     return this.findOneById(id);

@@ -11,10 +11,11 @@ export type ClearAccess = {
 };
 
 export type CreateAccess = {
-  email: string;
-  accessType: AccessEnum;
   folderId?: number;
   fileId?: number;
+  userId: number;
+  accessType: AccessEnum;
+  parentAccessFolderId?: number;
 };
 
 export type AddParentFolderAccess = {
