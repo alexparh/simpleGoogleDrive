@@ -22,8 +22,14 @@ import { isValidFolderOrFileName } from '../../utils/nameValidation';
 import { FileService } from '../files/file.service';
 import { AccessService } from '../access/access.service';
 import { UsersService } from '../users/users.service';
+import config from '../../config';
 
-const storagePath = join(__dirname, '..', '..', 'storage');
+const {
+  storage: { storageFolder },
+} = config();
+
+const storagePath = join(__dirname, '..', '..', '..', storageFolder);
+
 const relations = ['subfolders', 'files', 'accessList'];
 
 @Injectable()

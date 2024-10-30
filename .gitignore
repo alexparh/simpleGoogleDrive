@@ -3,6 +3,7 @@
 # storages
 /storage
 /testStorages
+/public
 
 # compiled output
 /dist

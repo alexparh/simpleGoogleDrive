@@ -7,6 +7,7 @@ import {
   FileCopy,
   FileDelete,
   FileUpdate,
+  FileLink,
 } from './file.graphql.entity';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-minimal';
 import { Ok } from '../../system/system.graphql.entity';
@@ -27,10 +28,10 @@ export class FileResolver {
     });
   }
 
-  // @Query(() => Stream, { name: 'downloadFile' })
-  // async download(@Args() args: FileDownload): Promise<Stream> {
-  //   return this.fileService.load(args);
-  // }
+  @Query(() => FileLink, { name: 'downloadFile' })
+  async download(@Args() args: FileDownload) {
+    return this.fileService.load(args);
+  }
 
   @Mutation(() => File, { name: 'uploadFile', nullable: true })
   @UseGuards(AuthenticatedAuthGuard)

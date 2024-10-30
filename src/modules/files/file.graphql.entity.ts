@@ -40,6 +40,12 @@ export class File {
   accessList?: Access[];
 }
 
+@ObjectType()
+export class FileLink {
+  @Field({ description: 'File download link' })
+  downloadLink: string;
+}
+
 @ArgsType()
 @ObjectType({ description: 'Upload file' })
 export class FileDownload {

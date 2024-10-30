@@ -3,11 +3,13 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  Logger,
   forwardRef,
 } from '@nestjs/common';
 import { FileUpload } from 'graphql-upload-minimal';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { randomBytes } from 'crypto';
 import { File } from '../../entities/file.entity';
 import {
   loadFileType,
@@ -16,7 +18,7 @@ import {
   updateFileType,
   deleteFileType,
 } from '../../types/file.type';
-import { join, dirname } from 'path';
+import { join, dirname, extname } from 'path';
 import { access, rename, unlink, copyFile } from 'fs/promises';
 import { Ok } from 'src/system/system.graphql.entity';
 import { isValidFolderOrFileName } from '../../utils/nameValidation';
@@ -24,12 +26,23 @@ import { FolderService } from '../folders/folder.service';
 import { createWriteStream, createReadStream, ReadStream } from 'fs';
 import { AccessService } from '../access/access.service';
 import { UsersService } from '../users/users.service';
+import config from '../../config';
 
-const storagePath = join(__dirname, '..', '..', 'storage');
+const {
+  file: { tempFileExpiresIn },
+  storage: { storageFolder, tempFolder },
+  system: { host },
+} = config();
+
+const storagePath = join(__dirname, '..', '..', '..', storageFolder);
+const tempPath = join(__dirname, '..', '..', '..', tempFolder);
+
 const relations = ['accessList'];
 
 @Injectable()
 export class FileService {
+  private readonly logger = new Logger(FileService.name);
+
   constructor(
     @InjectRepository(File)
     private fileRepository: Repository<File>,
@@ -61,17 +74,31 @@ export class FileService {
     return this.findOneBy({ id });
   }
 
-  async load(args: loadFileType): Promise<ReadStream> {
+  async load(args: loadFileType): Promise<string> {
     const { id } = args;
-    const absolutePath = await this.getAbsolutePathById(id);
+    const absoluteFilePath = await this.getAbsolutePathById(id);
+
+    const hash = randomBytes(16).toString('hex');
+    const fileExtension = extname(absoluteFilePath);
+    const tempFileName = `${hash}${fileExtension}`;
+    const tempFilePath = join(tempPath, tempFileName);
 
     try {
-      await access(absolutePath);
+      await access(absoluteFilePath);
+      await copyFile(absoluteFilePath, tempFilePath);
     } catch (Err) {
-      throw new InternalServerErrorException(`Unable to access file: ${Err}`);
+      throw new InternalServerErrorException(`Unable to load file: ${Err}`);
     }
 
-    return createReadStream(absolutePath);
+    setTimeout(async () => {
+      try {
+        await unlink(tempFilePath);
+      } catch (err) {
+        this.logger.log(`Failed to delete temp file: ${tempFilePath}`, err);
+      }
+    }, tempFileExpiresIn);
+
+    return `${host}/temp/${tempFileName}`;
   }
 
   async upload(
