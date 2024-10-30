@@ -1,4 +1,5 @@
 import {
+  AfterLoad,
   BaseEntity,
   Column,
   CreateDateColumn,
@@ -10,8 +11,14 @@ import {
 import { User } from './user.entity';
 import { Folder } from './folder.entity';
 import { Field, ID } from '@nestjs/graphql';
-import { ViewEnum } from 'src/enums/view.enum';
 import { AccessList } from './accessList.entity';
+import config from '../config';
+import { Exclude } from 'class-transformer';
+
+const {
+  storage: { tempFolder },
+  system: { host },
+} = config();
 
 @Entity()
 export class File extends BaseEntity {
@@ -31,8 +38,11 @@ export class File extends BaseEntity {
   @Column('int')
   folderId: number;
 
-  @Column({ type: 'enum', enum: ViewEnum, default: ViewEnum.PRIVATE })
-  viewType: string;
+  @Column('varchar')
+  @Exclude()
+  publicHash: string;
+
+  publicUrl: string;
 
   @Column('varchar')
   path: string;
@@ -48,4 +58,9 @@ export class File extends BaseEntity {
 
   @OneToMany(() => AccessList, (accesList) => accesList.file, { cascade: true })
   accesList: AccessList[];
+
+  @AfterLoad()
+  private setPublicUrl() {
+    this.publicUrl = `${host}/${tempFolder}/${this.publicHash}`;
+  }
 }

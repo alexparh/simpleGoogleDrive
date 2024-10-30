@@ -27,7 +27,7 @@ async function bootstrap() {
     fs.mkdirSync(tempFolderPath);
   }
 
-  app.use('/temp', expressStatic(tempFolderPath));
+  app.use(`/${tempFolder}`, expressStatic(tempFolderPath));
   await app.listen(port);
 }
 bootstrap();

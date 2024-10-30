@@ -1,4 +1,3 @@
-import { ViewEnum } from 'src/enums/view.enum';
 import { Access } from './access.type';
 
 export type loadFileType = {
@@ -16,10 +15,15 @@ export type cloneFileType = {
 export type updateFileType = {
   id: number;
   name?: string;
-  viewType?: ViewEnum;
+  isPublic?: boolean;
   accessList?: Access[];
 };
 
 export type deleteFileType = {
   id: number;
+};
+
+export type TempFileIformation = {
+  tempFileName: string;
+  tempFilePath: string;
 };

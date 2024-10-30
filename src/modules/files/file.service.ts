@@ -17,8 +17,9 @@ import {
   cloneFileType,
   updateFileType,
   deleteFileType,
+  TempFileIformation,
 } from '../../types/file.type';
-import { join, dirname, extname } from 'path';
+import { join, dirname, extname, basename } from 'path';
 import { access, rename, unlink, copyFile } from 'fs/promises';
 import { Ok } from 'src/system/system.graphql.entity';
 import { isValidFolderOrFileName } from '../../utils/nameValidation';
@@ -70,14 +71,12 @@ export class FileService {
     });
   }
 
-  findOneById(id: number): Promise<File | null> {
+  async findOneById(id: number): Promise<File | null> {
     return this.findOneBy({ id });
   }
 
-  async load(args: loadFileType): Promise<string> {
-    const { id } = args;
-    const absoluteFilePath = await this.getAbsolutePathById(id);
-
+  async addToPublicStorage(path: string): Promise<TempFileIformation> {
+    const absoluteFilePath = join(storagePath, path);
     const hash = randomBytes(16).toString('hex');
     const fileExtension = extname(absoluteFilePath);
     const tempFileName = `${hash}${fileExtension}`;
@@ -90,6 +89,16 @@ export class FileService {
       throw new InternalServerErrorException(`Unable to load file: ${Err}`);
     }
 
+    return { tempFilePath, tempFileName };
+  }
+
+  async load(args: loadFileType): Promise<string> {
+    const { id } = args;
+
+    const { path, publicUrl } = await this.findOneById(id);
+    if (publicUrl) return publicUrl;
+
+    const { tempFilePath, tempFileName } = await this.addToPublicStorage(path);
     setTimeout(async () => {
       try {
         await unlink(tempFilePath);
@@ -98,7 +107,7 @@ export class FileService {
       }
     }, tempFileExpiresIn);
 
-    return `${host}/temp/${tempFileName}`;
+    return `${host}/${tempFolder}/${tempFileName}`;
   }
 
   async upload(
@@ -177,7 +186,7 @@ export class FileService {
   async update(args: updateFileType): Promise<File | null> {
     const file = await this.findOneById(args.id);
     if (!file) return null;
-    const { accessList, ...fileArgs } = args;
+    const { accessList, isPublic, ...fileArgs } = args;
     const { id, name } = fileArgs;
 
     if (name) {
@@ -187,6 +196,29 @@ export class FileService {
         await rename(absolutePath, join(dirname(absolutePath), name));
       } catch (Err) {
         throw new InternalServerErrorException(`Unable to rename file: ${Err}`);
+      }
+    }
+
+    if (isPublic !== null) {
+      // set public
+      if (isPublic && !file.publicUrl) {
+        const { tempFileName } = await this.addToPublicStorage(file.path);
+
+        fileArgs['publicHash'] = tempFileName;
+      }
+
+      // set private
+      if (!isPublic && file.publicUrl) {
+        const pulicFilePath = join(tempPath, basename(file.publicUrl));
+        try {
+          await unlink(pulicFilePath);
+        } catch (Err) {
+          throw new InternalServerErrorException(
+            `Unable to set file view to private: ${Err}`,
+          );
+        }
+
+        fileArgs['publicHash'] = null;
       }
     }
 
