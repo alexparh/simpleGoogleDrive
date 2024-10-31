@@ -19,9 +19,6 @@ type Access {
   """A unique identifier for access to file/folder"""
   id: ID!
 
-  """Folder or file path"""
-  path: String
-
   """User id"""
   userId: ID!
 }
@@ -59,11 +56,11 @@ type File {
   """Folder path"""
   path: String!
 
+  """Public or private view"""
+  publicUrl: String
+
   """Folder creator id"""
   userId: ID!
-
-  """Public or private view"""
-  viewType: String!
 }
 
 type FileLink {
@@ -157,11 +154,11 @@ type Mutation {
     """A unique identifier for the file"""
     id: ID!
 
+    """Public or private view"""
+    isPublic: Boolean
+
     """Name"""
     name: String
-
-    """Public or private view"""
-    viewType: String
   ): File
   updateFolder(
     """New access list"""
@@ -194,7 +191,7 @@ type Query {
   ): FileLink!
   folder(id: ID): File
   google: RedirectUrlType
-  search(name: String!): SearchResult
+  search(name: String!): [SearchResult!]
 }
 
 """Redirect Url"""

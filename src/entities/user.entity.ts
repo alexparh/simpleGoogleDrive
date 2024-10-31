@@ -5,9 +5,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToMany,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { File } from './file.entity';
@@ -39,7 +37,7 @@ export class User extends BaseEntity {
   folders: Folder[];
 
   @OneToMany(() => AccessList, (accesList) => accesList.user)
-  accesList: AccessList[];
+  accessList: AccessList[];
 
   @Column('int', { nullable: true })
   rootFolderId: number;

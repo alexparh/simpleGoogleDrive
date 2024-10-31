@@ -24,13 +24,13 @@ export class AccessList extends BaseEntity {
   @Column('int')
   userId: number;
 
-  @ManyToOne(() => User, (user) => user.accesList)
+  @ManyToOne(() => User, (user) => user.accessList)
   user: User;
 
   @Column('int', { nullable: true })
   fileId: number;
 
-  @ManyToOne(() => User, (user) => user.accesList, {
+  @ManyToOne(() => File, (file) => file.accessList, {
     nullable: true,
     onDelete: 'CASCADE',
   })
@@ -39,7 +39,7 @@ export class AccessList extends BaseEntity {
   @Column('int', { nullable: true })
   folderId: number;
 
-  @ManyToOne(() => User, (user) => user.accesList, {
+  @ManyToOne(() => Folder, (folder) => folder.accessList, {
     nullable: true,
     onDelete: 'CASCADE',
   })
@@ -47,9 +47,6 @@ export class AccessList extends BaseEntity {
 
   @Column({ type: 'enum', enum: AccessEnum, default: AccessEnum.VIEW })
   accessType: string;
-
-  @Column('varchar', { nullable: true })
-  path?: string;
 
   @Column('int', { nullable: true })
   parentAccessFolderId: number;

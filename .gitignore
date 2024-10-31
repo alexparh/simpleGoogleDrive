@@ -2,8 +2,8 @@
 /test/docker/data/*
 # storages
 /storage
-/testStorages
-/public
+/testStorage
+/temp
 
 # compiled output
 /dist

@@ -32,9 +32,6 @@ export class Access {
   @Field({ description: 'The date the access was created' })
   createdAt: Date;
 
-  @Field({ description: 'Folder or file path', nullable: true })
-  path?: string;
-
   @Field({ description: 'Access type' })
   accessType: AccessEnum;
 }

@@ -28,6 +28,7 @@ import { createWriteStream } from 'fs';
 import { AccessService } from '../access/access.service';
 import { UsersService } from '../users/users.service';
 import config from '../../config';
+import { FileLink } from './file.graphql.entity';
 
 const {
   file: { tempFileExpiresIn },
@@ -35,8 +36,8 @@ const {
   system: { host },
 } = config();
 
-const storagePath = join(__dirname, '..', '..', '..', storageFolder);
-const tempPath = join(__dirname, '..', '..', '..', tempFolder);
+const storagePath = join(process.cwd(), storageFolder);
+const tempPath = join(process.cwd(), tempFolder);
 
 const relations = ['accessList'];
 
@@ -92,11 +93,11 @@ export class FileService {
     return { tempFilePath, tempFileName };
   }
 
-  async load(args: loadFileType): Promise<string> {
+  async load(args: loadFileType): Promise<FileLink> {
     const { id } = args;
 
     const { path, publicUrl } = await this.findOneById(id);
-    if (publicUrl) return publicUrl;
+    if (publicUrl) return { downloadLink: publicUrl };
 
     const { tempFilePath, tempFileName } = await this.addToPublicStorage(path);
     setTimeout(async () => {
@@ -107,7 +108,7 @@ export class FileService {
       }
     }, tempFileExpiresIn);
 
-    return `${host}/${tempFolder}/${tempFileName}`;
+    return { downloadLink: `${host}/${tempFolder}/${tempFileName}` };
   }
 
   async upload(
@@ -141,6 +142,7 @@ export class FileService {
 
     const newFile = await this.fileRepository.save({
       ...args,
+      name,
       path,
       userId,
     });
@@ -190,13 +192,15 @@ export class FileService {
     const { id, name } = fileArgs;
 
     if (name) {
-      const absolutePath = await this.getAbsolutePathById(id);
+      const absolutePath = join(storagePath, file.path);
       try {
         await access(absolutePath);
         await rename(absolutePath, join(dirname(absolutePath), name));
       } catch (Err) {
         throw new InternalServerErrorException(`Unable to rename file: ${Err}`);
       }
+
+      fileArgs['path'] = join(dirname(file.path), name);
     }
 
     if (isPublic !== null) {

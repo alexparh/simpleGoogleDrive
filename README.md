@@ -4,11 +4,22 @@ Simple google drive api (google auth, file and folder structure, view/edit user 
 
 ## Project setup
 
+### Install dependences
+
 ```bash
 $ npm install
 ```
 
-## Compile and run the project
+### Update .env with .env.example
+
+### Run database
+
+```
+cd test/docker
+sudo docker-compose up
+```
+
+### Compile and run the project
 
 ```bash
 # development
@@ -21,15 +32,12 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Run tests
+### Migration
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+$ npm migration:run
 ```
+
+### GUI
+
+[http://localhost:4000/graphql](http://localhost:4000/graphql)

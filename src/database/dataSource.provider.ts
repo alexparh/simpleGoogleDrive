@@ -14,7 +14,7 @@ const dataSourceObj = new DataSource({
   type: 'postgres',
   entities,
   migrations: [join(process.cwd(), 'dist/database/migrations/**/*.js')],
-  synchronize: true,
+  synchronize: false,
 });
 
 export const dataSource = dataSourceObj;

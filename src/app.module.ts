@@ -13,6 +13,7 @@ import { FileModule } from './modules/files/file.module';
 import { AccessModule } from './modules/access/access.module';
 import { ScheduleModule } from './modules/scheldue/scheldue.module';
 import { SearchModule } from './modules/search/search.module';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 
 @Module({
   imports: [
@@ -24,6 +25,8 @@ import { SearchModule } from './modules/search/search.module';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
+      playground: false,
+      plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

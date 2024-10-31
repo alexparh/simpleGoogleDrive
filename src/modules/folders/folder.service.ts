@@ -28,7 +28,7 @@ const {
   storage: { storageFolder },
 } = config();
 
-const storagePath = join(__dirname, '..', '..', '..', storageFolder);
+const storagePath = join(process.cwd(), storageFolder);
 
 const relations = ['subfolders', 'files', 'accessList'];
 
@@ -141,7 +141,7 @@ export class FolderService {
     const folder = await this.findOneById(folderId);
 
     await this.accessService.createAccess({
-      folderId,
+      folderId: folder.id,
       ...folderAccessArgs,
       parentAccessFolderId: isRoot ? null : args.parentAccessFolderId,
     });
@@ -170,7 +170,7 @@ export class FolderService {
     const { id, name } = folderArgs;
 
     if (name) {
-      const absolutePath = await this.getAbsolutePathById(id);
+      const absolutePath = join(storagePath, folder.path);
       try {
         await access(absolutePath);
         await rename(absolutePath, join(dirname(absolutePath), args.name));
@@ -179,6 +179,8 @@ export class FolderService {
           `Unable to rename fodler: ${Err}`,
         );
       }
+
+      folderArgs['path'] = join(dirname(folder.path), name);
     }
 
     await this.folderRepository.update({ id }, folderArgs);

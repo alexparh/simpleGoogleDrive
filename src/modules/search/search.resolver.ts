@@ -10,7 +10,7 @@ import { SearchService } from './search.service';
 export class SearchResolver {
   constructor(private searchService: SearchService) {}
 
-  @Query(() => SearchResult, { name: 'search', nullable: true })
+  @Query(() => [SearchResult], { name: 'search', nullable: true })
   @UseGuards(AuthenticatedAuthGuard)
   search(@Args('name') name: string, @CurrentUser() user: User) {
     return this.searchService.search(name, user.id);

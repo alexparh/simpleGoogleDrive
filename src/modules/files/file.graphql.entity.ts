@@ -1,11 +1,5 @@
 import 'reflect-metadata';
-import {
-  ArgsType,
-  Field,
-  ID,
-  ObjectType,
-  registerEnumType,
-} from '@nestjs/graphql';
+import { ArgsType, Field, ID, ObjectType } from '@nestjs/graphql';
 import { Access, AddAccess } from '../access/access.graphql.entity';
 
 @ObjectType()
@@ -28,8 +22,8 @@ export class File {
   @Field({ description: 'Folder path' })
   path: string;
 
-  @Field({ description: 'Public or private view' })
-  isPublic: boolean;
+  @Field({ description: 'Public or private view', nullable: true })
+  publicUrl: string;
 
   @Field(() => [Access], { description: 'Access list', nullable: true })
   accessList?: Access[];

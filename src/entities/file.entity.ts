@@ -38,7 +38,7 @@ export class File extends BaseEntity {
   @Column('int')
   folderId: number;
 
-  @Column('varchar')
+  @Column('varchar', { nullable: true })
   @Exclude()
   publicHash: string;
 
@@ -57,10 +57,11 @@ export class File extends BaseEntity {
   folder: Folder;
 
   @OneToMany(() => AccessList, (accesList) => accesList.file, { cascade: true })
-  accesList: AccessList[];
+  accessList: AccessList[];
 
   @AfterLoad()
   private setPublicUrl() {
-    this.publicUrl = `${host}/${tempFolder}/${this.publicHash}`;
+    if (this.publicHash)
+      this.publicUrl = `${host}/${tempFolder}/${this.publicHash}`;
   }
 }

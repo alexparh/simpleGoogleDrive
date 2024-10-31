@@ -51,5 +51,5 @@ export class Folder extends BaseEntity {
   @OneToMany(() => AccessList, (accesList) => accesList.folder, {
     cascade: true,
   })
-  accesList: AccessList[];
+  accessList: AccessList[];
 }

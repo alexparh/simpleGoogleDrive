@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { IsNull } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AccessList } from 'src/entities/accessList.entity';
@@ -38,7 +39,7 @@ export class AccessService {
 
   async clearAccess(args: ClearAccess): Promise<Ok> {
     const [{ affected }] = (await Promise.all([
-      this.accessRepository.delete({ ...args, parentAccessFolderId: null }),
+      this.accessRepository.delete({ parentAccessFolderId: IsNull(), ...args }),
       args.folderId
         ? this.accessRepository.delete({
             parentAccessFolderId: args.folderId,
